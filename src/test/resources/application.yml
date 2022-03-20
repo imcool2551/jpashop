@@ -1,0 +1,4 @@
+logging:
+  level:
+    org.hibernate.SQL: debug # logger
+    org.hibernate.type: trace
