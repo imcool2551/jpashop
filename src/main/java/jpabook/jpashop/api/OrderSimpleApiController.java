@@ -55,7 +55,18 @@ public class OrderSimpleApiController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * V3. DTO 변환 + 페치 조인
+     * - 페치 조인으로 N+1 문제 해결
+     */
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(new OrderSearch());
 
+        return orders.stream()
+                .map(SimpleOrderDto::new)
+                .collect(Collectors.toList());
+    }
 
     @Data
     static class SimpleOrderDto {
