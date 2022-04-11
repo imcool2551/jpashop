@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     /**
      * V1. 엔티티 직접 노출
@@ -56,16 +59,28 @@ public class OrderSimpleApiController {
     }
 
     /**
-     * V3. DTO 변환 + 페치 조인
+     * V3(*). DTO 변환 + 페치 조인
      * - 페치 조인으로 N+1 문제 해결
      */
     @GetMapping("/api/v3/simple-orders")
     public List<SimpleOrderDto> ordersV3() {
-        List<Order> orders = orderRepository.findAllWithMemberDelivery(new OrderSearch());
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
 
         return orders.stream()
                 .map(SimpleOrderDto::new)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * V4(*). DTO 직접 조회
+     * - 딱 필요한 데이터만 퍼올리기 때문에 성능 향상(미비)
+     * - but 쿼리의 재사용성이 거의 없고 API 스펙이 데이터 접근 계층에 들어가버림
+     * - DTO 직접 조회용 리포지토리를 분리하는 것을 추천
+     */
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
+
     }
 
     @Data
